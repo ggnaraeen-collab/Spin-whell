@@ -1,4 +1,3 @@
-
 name: Build Arisan Spin APK
 
 on:
@@ -18,9 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Extract Android project
-        run: |
-          unzip -q Arisan-Spin-Android-Project.zip
-          ls -la arisan-spin-android
+        run: unzip -q Arisan-Spin-Android-Project.zip
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
@@ -32,6 +29,37 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+
+      - name: Fix Java Kotlin compatibility
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("arisan-spin-android/app/build.gradle.kts")
+          s = p.read_text()
+
+          marker = "    targetSdk = 35\n"
+
+          addition = """    targetSdk = 35
+
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+
+              kotlinOptions {
+                  jvmTarget = "17"
+              }
+          """
+
+          if "compileOptions" not in s:
+              if marker not in s:
+                  raise SystemExit("targetSdk marker not found")
+              s = s.replace(marker, addition, 1)
+
+          p.write_text(s)
+          print("Java and Kotlin targets set to 17")
+          PY
 
       - name: Build Android APK
         run: |
