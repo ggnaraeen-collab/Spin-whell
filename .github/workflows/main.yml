@@ -20,7 +20,7 @@ jobs:
 
       - name: Extract project
         run: |
-          unzip -q Spin-Doorprize-Android-Project-v1.2.zip
+          unzip -q Spin-Doorprize-Android-Project-v1.2.1.zip
           test -f spin-doorprize-android/settings.gradle.kts
           test -f spin-doorprize-android/app/build.gradle.kts
 
